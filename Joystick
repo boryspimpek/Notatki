@@ -1,0 +1,27 @@
+void loop() {
+  if (PS4.isConnected()) {
+    // Odczyt wartości joysticków
+    int throttle = PS4.LStickY();
+    int steering = PS4.RStickX();
+
+    // Mapowanie prędkości na zakres -255:255
+    int mappedThrottle = map(throttle, -128, 127, -MAX_DUTY_CYCLE, MAX_DUTY_CYCLE);
+
+    // Mapowanie sterowania na zakres 0 do mappedThrottle
+    int mappedSteering = map(steering, -128, 127, 0, abs(mappedThrottle));
+
+    // Wyznaczanie mocy dla silników
+    int leftMotorPower = mappedThrottle;  // Lewy silnik pracuje tylko na mappedThrottle
+    int rightMotorPower = mappedThrottle - 2 * mappedSteering;
+
+    // Ograniczenie zakresu
+    leftMotorPower = constrain(leftMotorPower, -MAX_DUTY_CYCLE, MAX_DUTY_CYCLE);
+    rightMotorPower = constrain(rightMotorPower, -MAX_DUTY_CYCLE, MAX_DUTY_CYCLE);
+
+    // Sterowanie silnikami
+    driveMotors(leftMotorPower, rightMotorPower);
+  } else {
+    Serial.println("Kontroler PS4 nie jest podłączony!");
+    driveMotors(0, 0); // Zatrzymaj silniki
+  }
+}
